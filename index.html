@@ -168,6 +168,31 @@ input[type=range] { width:100%; accent-color:var(--red); cursor:pointer; }
 <div class="main">
   <!-- LEFT -->
   <div>
+    <!-- プロジェクト設定 -->
+    <div class="card">
+      <div class="card-label">プロジェクト設定</div>
+      <div class="field">
+        <label>プロジェクト名</label>
+        <input type="text" id="projectName" placeholder="例：カヤ_LP_2026-03" oninput="updateProjectId()">
+        <div class="field-hint">表示回数の管理に使用します。半角英数字・アンダースコア推奨</div>
+      </div>
+      <div class="field">
+        <label>最大表示回数</label>
+        <select id="maxShow">
+          <option value="1">1回のみ（× で閉じたら二度と出ない）</option>
+          <option value="2">2回まで</option>
+          <option value="3">3回まで</option>
+          <option value="4">4回まで</option>
+          <option value="5">5回まで</option>
+          <option value="99">無制限（毎回表示）</option>
+        </select>
+        <div class="field-hint" id="maxShowHint">ユーザーのブラウザに記録され、同じブラウザでは設定回数を超えて表示されません</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--muted);line-height:1.7;">
+        管理キー：<code id="projectKeyDisplay" style="color:var(--red);font-size:11px;">atm_（プロジェクト名を入力）</code>
+      </div>
+    </div>
+
     <!-- 画像 -->
     <div class="card">
       <div class="card-label">ポップアップ画像</div>
@@ -407,6 +432,15 @@ input[type=range] { width:100%; accent-color:var(--red); cursor:pointer; }
 
 <script>
 // =====================
+// PROJECT
+// =====================
+function updateProjectId() {
+  var name = document.getElementById('projectName').value.trim();
+  var key = name ? 'atm_' + name.replace(/[^a-zA-Z0-9_\-]/g, '_') : 'atm_（プロジェクト名を入力）';
+  document.getElementById('projectKeyDisplay').textContent = key;
+}
+
+// =====================
 // STATE
 // =====================
 var currentMode = 'hybrid';
@@ -633,10 +667,14 @@ function showGA4Chart(events, lp, e0, e25, e50, e75, aiLabel) {
 function generate() {
   var imgSrc = imageData || document.getElementById('imageUrl').value.trim();
   var ctaUrl = document.getElementById('ctaUrl').value.trim();
+  var projectName = document.getElementById('projectName').value.trim();
+  if(!projectName){ alert('プロジェクト名を入力してください'); return; }
   if(!imgSrc){ alert('画像をアップロードするかURLを入力してください'); return; }
   if(!ctaUrl){ alert('クリック先URLを入力してください'); return; }
 
   var cfg = getConfig();
+  cfg.projectKey = 'atm_' + projectName.replace(/[^a-zA-Z0-9_\-]/g, '_');
+  cfg.maxShow = parseInt(document.getElementById('maxShow').value);
   var code = buildCode(imgSrc, ctaUrl, cfg);
   document.getElementById('outputCode').textContent = code;
   document.getElementById('outputCard').classList.add('show');
@@ -668,7 +706,8 @@ function buildCode(imgSrc, ctaUrl, c) {
   if(c.scrollP) parts.push("var mx=0,rh=false;window.addEventListener('scroll',function(){var y=window.scrollY,h=document.documentElement.scrollHeight-window.innerHeight;if(h>0&&y/h>=S)rh=true;if(y>mx)mx=y;if(rh&&mx-y>U)show();},{passive:true});");
   if(c.idleP)   parts.push("var t=null,ir=false;function ri(){var h=document.documentElement.scrollHeight-window.innerHeight;if(h>0&&window.scrollY/h>=S)ir=true;if(!ir)return;clearTimeout(t);t=setTimeout(show,I);}window.addEventListener('scroll',ri,{passive:true});document.addEventListener('touchstart',ri,{passive:true});");
 
-  return `<!-- Atomoi Popup -->
+  var maxShowLabel = c.maxShow === 99 ? '無制限' : c.maxShow + '回まで表示';
+  return `<!-- Atomoi Popup | Project: ${c.projectKey} | 表示: ${maxShowLabel} -->
 <style>
 #atm-o{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:99999;align-items:center;justify-content:center}
 #atm-o.show{display:flex}
@@ -685,9 +724,19 @@ function buildCode(imgSrc, ctaUrl, c) {
 </div>
 <script>
 (function(){
-  var o=document.getElementById('atm-o'),shown=false;
+  var o=document.getElementById('atm-o');
+  var KEY='${c.projectKey}',MAX=${c.maxShow};
+  var cnt=parseInt(localStorage.getItem(KEY)||'0');
+  var shownThisPage=false;
   var S=${c.scroll},U=${c.upPx},I=${c.idle};
-  function show(){if(shown)return;shown=true;o.classList.add('show');}
+  function show(){
+    if(shownThisPage)return;
+    if(cnt>=MAX)return;
+    shownThisPage=true;
+    cnt++;
+    localStorage.setItem(KEY,cnt);
+    o.classList.add('show');
+  }
   o.addEventListener('click',function(e){if(e.target===o)o.classList.remove('show');});
   ${parts.join('\n  ')}
 })();
