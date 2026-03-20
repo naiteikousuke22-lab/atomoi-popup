@@ -1021,7 +1021,7 @@ function connectGA4() {
   // Google OAuth2 (GIS)
   google.accounts.oauth2.initTokenClient({
     // ※ 本番運用時はご自身のOAuth2クライアントIDに置き換えてください
-    client_id: 'YOUR_GOOGLE_OAUTH_CLIENT_ID',
+    client_id: '275470887028-nmevg8q1j62plo7uqi0tjseja9mnqb47.apps.googleusercontent.com',
     scope: 'https://www.googleapis.com/auth/analytics.readonly',
     callback: function(resp) {
       if(resp.error){ setGA4Status('ga4','off','接続エラー'); document.getElementById('ga4-btn').disabled=false; return; }
@@ -1038,7 +1038,7 @@ function connectGA4Hybrid() {
   document.getElementById('ga4h-btn').disabled = true;
 
   google.accounts.oauth2.initTokenClient({
-    client_id: 'YOUR_GOOGLE_OAUTH_CLIENT_ID',
+    client_id: '275470887028-nmevg8q1j62plo7uqi0tjseja9mnqb47.apps.googleusercontent.com',
     scope: 'https://www.googleapis.com/auth/analytics.readonly',
     callback: function(resp) {
       if(resp.error){ setGA4Status('ga4h','off','接続エラー'); document.getElementById('ga4h-btn').disabled=false; return; }
