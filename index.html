@@ -534,15 +534,21 @@ input[type=range] { width:100%; accent-color:var(--red); cursor:pointer; }
         <span class="connect-btn-icon">📘</span>
         <div class="connect-btn-text">
           <span class="connect-btn-name">Meta（Facebook / Instagram）</span>
-          <span class="connect-btn-hint">アクセストークン・アカウントID を設定</span>
+          <span class="connect-btn-hint">読み取り専用トークン — データ取得のみ、入稿・変更は不可</span>
         </div>
         <span class="connect-status off" id="meta-status">未設定</span>
       </div>
       <div id="meta-form" style="display:none;" class="card" style="margin-top:10px;">
+        <div style="background:rgba(255,59,48,.08);border:1px solid rgba(255,59,48,.25);border-radius:8px;padding:12px 14px;font-size:12px;color:#ccc;line-height:1.8;margin-bottom:14px;">
+          ⚠️ <strong style="color:var(--red);">必ず読み取り専用スコープのみ</strong>で発行してください<br>
+          許可するスコープ：<code style="color:#7dd3fc;">ads_read</code>・<code style="color:#7dd3fc;">read_insights</code><br>
+          <strong style="color:var(--red);">絶対に付与しない：</strong><code style="color:#f87171;">ads_management</code>・<code style="color:#f87171;">business_management</code><br>
+          これらを付与すると広告の停止・変更が可能になります
+        </div>
         <div class="field">
-          <label>アクセストークン</label>
+          <label>アクセストークン（読み取り専用）</label>
           <input type="text" id="meta-token" placeholder="EAAxxxxx...">
-          <div class="field-hint">Meta Business Suite → 設定 → システムユーザー → トークン生成</div>
+          <div class="field-hint">Meta Business Suite → 設定 → システムユーザー → トークン生成 → スコープは ads_read のみ選択</div>
         </div>
         <div class="field">
           <label>広告アカウントID</label>
@@ -555,14 +561,21 @@ input[type=range] { width:100%; accent-color:var(--red); cursor:pointer; }
         <span class="connect-btn-icon">💬</span>
         <div class="connect-btn-text">
           <span class="connect-btn-name">LINE広告</span>
-          <span class="connect-btn-hint">チャネルアクセストークン・アカウントIDを設定</span>
+          <span class="connect-btn-hint">読み取り専用トークン — データ取得のみ、入稿・変更は不可</span>
         </div>
         <span class="connect-status off" id="line-status">未設定</span>
       </div>
       <div id="line-form" style="display:none;" class="card">
+        <div style="background:rgba(255,59,48,.08);border:1px solid rgba(255,59,48,.25);border-radius:8px;padding:12px 14px;font-size:12px;color:#ccc;line-height:1.8;margin-bottom:14px;">
+          ⚠️ <strong style="color:var(--red);">必ず読み取り専用で発行してください</strong><br>
+          許可するスコープ：<code style="color:#7dd3fc;">adaccount.readonly</code>・<code style="color:#7dd3fc;">report.readonly</code><br>
+          <strong style="color:var(--red);">絶対に付与しない：</strong><code style="color:#f87171;">adaccount.write</code><br>
+          これを付与すると広告キャンペーンの変更・停止が可能になります
+        </div>
         <div class="field">
-          <label>チャネルアクセストークン</label>
+          <label>チャネルアクセストークン（読み取り専用）</label>
           <input type="text" id="line-token" placeholder="LINE Ads APIトークン">
+          <div class="field-hint">LINE Ads Manager → API管理 → トークン発行 → スコープは report.readonly のみ選択</div>
         </div>
         <div class="field">
           <label>広告アカウントID</label>
@@ -577,19 +590,26 @@ input[type=range] { width:100%; accent-color:var(--red); cursor:pointer; }
       <div class="connect-btn" onclick="toggleConnectForm('ga4-setup-form')">
         <span class="connect-btn-icon">📊</span>
         <div class="connect-btn-text">
-          <span class="connect-btn-name">GA4 / GTM</span>
-          <span class="connect-btn-hint">プロパティID・コンテナIDを設定</span>
+          <span class="connect-btn-name">Google（GA4 / GTM）</span>
+          <span class="connect-btn-hint">読み取り専用 — データ取得のみ、タグ・設定の変更は不可</span>
         </div>
         <span class="connect-status off" id="ga4-setup-status">未設定</span>
       </div>
       <div id="ga4-setup-form" style="display:none;" class="card">
+        <div style="background:rgba(255,59,48,.08);border:1px solid rgba(255,59,48,.25);border-radius:8px;padding:12px 14px;font-size:12px;color:#ccc;line-height:1.8;margin-bottom:14px;">
+          ⚠️ <strong style="color:var(--red);">読み取り専用スコープのみ使用</strong>しています<br>
+          使用するスコープ：<code style="color:#7dd3fc;">analytics.readonly</code>（GA4データ取得のみ）<br>
+          GTMタグの追加・変更・削除は一切できません
+        </div>
         <div class="field">
           <label>GA4 プロパティID</label>
           <input type="text" id="setup-ga4-prop" placeholder="527488442">
+          <div class="field-hint">GA4管理画面 → プロパティ設定 → プロパティID</div>
         </div>
         <div class="field">
           <label>GTM コンテナID</label>
           <input type="text" id="setup-gtm" placeholder="GTM-XXXXXXX">
+          <div class="field-hint">GTM管理画面 → コンテナID（参照用のみ。タグの変更はできません）</div>
         </div>
         <button class="gen-btn" style="margin-top:8px;" onclick="saveConnect('ga4-setup')">保存してGASコードに反映</button>
       </div>
