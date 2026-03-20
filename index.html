@@ -1339,11 +1339,11 @@ function generateGAS() {
   if(gadsRes.results) gadsRes.results.forEach(function(r) {
     gadsSpend  += (r.metrics.costMicros || 0) / 1000000;
     gadsClicks += parseInt(r.metrics.clicks || 0);
-  });` : \`
+  });` : `
   // Google広告未設定 - 連携設定からGoogle広告を追加してください
-  var gadsSpend = 0, gadsClicks = 0;\`;
+  var gadsSpend = 0, gadsClicks = 0;`;
 
-  var lineSection = connectData.lineToken ? \`
+  var lineSection = connectData.lineToken ? `
   // ---- LINE広告データ取得 ----
   var LINE_TOKEN   = '${connectData.lineToken || 'YOUR_LINE_TOKEN'}';
   var LINE_ACCOUNT = '${connectData.lineAccount || 'YOUR_LINE_ACCOUNT'}';
