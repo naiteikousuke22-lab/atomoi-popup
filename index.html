@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atomoi Popup — AI Exit Intent Generator</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --red: #ff3b30; --red-dark: #c0271e;
+  --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c; --surface3: #222;
+  --border: #2a2a2a; --text: #f0f0f0; --muted: #666;
+  --green: #34c759; --blue: #0a84ff; --yellow: #ffd60a;
+}
+body { font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* HEADER */
+header { display:flex; align-items:center; justify-content:space-between; padding:16px 28px; border-bottom:1px solid var(--border); position:sticky; top:0; background:rgba(10,10,10,.93); backdrop-filter:blur(14px); z-index:200; }
+.logo { font-size:19px; font-weight:900; letter-spacing:-.5px; }
+.logo em { color:var(--red); font-style:normal; }
+.logo small { font-size:10px; font-weight:500; color:var(--muted); letter-spacing:2px; text-transform:uppercase; margin-left:8px; vertical-align:middle; }
+.hbadge { font-size:11px; background:rgba(255,59,48,.15); color:var(--red); border:1px solid rgba(255,59,48,.3); border-radius:20px; padding:4px 12px; }
+
+/* HERO */
+.hero { text-align:center; padding:52px 20px 40px; max-width:620px; margin:0 auto; }
+.hero-eye { font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--red); margin-bottom:14px; }
+.hero h1 { font-size:32px; font-weight:900; line-height:1.2; margin-bottom:14px; letter-spacing:-.5px; }
+.hero h1 span { color:var(--red); }
+.hero p { font-size:14px; color:var(--muted); line-height:1.7; }
+
+/* MAIN */
+.main { max-width:1080px; margin:0 auto; padding:0 20px 80px; display:grid; grid-template-columns:1fr 380px; gap:20px; align-items:start; }
+@media(max-width:800px){ .main{ grid-template-columns:1fr; } .preview-col{ order:-1; } }
+
+/* CARD */
+.card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:22px; margin-bottom:16px; }
+.card-label { font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.card-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* FIELD */
+.field { margin-bottom:14px; }
+.field:last-child { margin-bottom:0; }
+.field > label { display:block; font-size:13px; color:#bbb; font-weight:500; margin-bottom:6px; }
+input[type=url], input[type=text], input[type=number], select, textarea {
+  width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:8px;
+  padding:10px 13px; color:var(--text); font-size:13px; outline:none; transition:border-color .18s;
+}
+input:focus, select:focus, textarea:focus { border-color:var(--red); }
+.field-hint { font-size:11px; color:var(--muted); margin-top:4px; line-height:1.5; }
+
+/* UPLOAD */
+.upload-zone { border:2px dashed var(--border); border-radius:10px; padding:24px; text-align:center; cursor:pointer; transition:border-color .18s, background .18s; position:relative; }
+.upload-zone:hover,.upload-zone.drag { border-color:var(--red); background:rgba(255,59,48,.04); }
+.upload-zone input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; }
+.upload-icon { font-size:26px; margin-bottom:6px; }
+.upload-text { font-size:12px; color:#888; line-height:1.6; }
+.upload-text strong { color:var(--red); }
+#uploadPreview { display:none; width:100%; border-radius:8px; margin-top:10px; max-height:160px; object-fit:contain; }
+.or-div { display:flex; align-items:center; gap:10px; margin:10px 0; font-size:11px; color:var(--muted); }
+.or-div::before,.or-div::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* MODE TABS */
+.mode-tabs { display:flex; background:var(--surface2); border-radius:10px; padding:4px; gap:4px; margin-bottom:18px; }
+.mode-tab { flex:1; background:transparent; border:none; border-radius:7px; padding:9px 6px; color:var(--muted); font-size:12px; font-weight:600; cursor:pointer; transition:all .18s; text-align:center; }
+.mode-tab.active { background:var(--surface3); color:var(--text); }
+.mode-tab .tab-icon { display:block; font-size:16px; margin-bottom:3px; }
+.mode-panel { display:none; }
+.mode-panel.active { display:block; }
+
+/* SLIDER */
+.slider-row { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+.slider-label { font-size:12px; color:#aaa; width:120px; flex-shrink:0; }
+.slider-wrap { flex:1; position:relative; }
+input[type=range] { width:100%; accent-color:var(--red); cursor:pointer; }
+.slider-val { font-size:12px; font-weight:700; color:var(--text); width:52px; text-align:right; }
+
+/* TOGGLES */
+.toggle-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.toggle-item { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; transition:border-color .18s; }
+.toggle-item.on { border-color:rgba(52,199,89,.4); }
+.toggle-name { font-size:12px; color:#aaa; }
+.toggle-switch { width:36px; height:20px; background:var(--border); border-radius:10px; position:relative; transition:background .18s; flex-shrink:0; }
+.toggle-item.on .toggle-switch { background:var(--green); }
+.toggle-switch::after { content:''; position:absolute; top:3px; left:3px; width:14px; height:14px; background:#fff; border-radius:50%; transition:left .18s; }
+.toggle-item.on .toggle-switch::after { left:19px; }
+
+/* GA4 CONNECT */
+.ga4-box { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:18px; }
+.ga4-status { display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:14px; }
+.status-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.status-dot.off { background:var(--muted); }
+.status-dot.connecting { background:var(--yellow); animation:pulse 1s infinite; }
+.status-dot.on { background:var(--green); box-shadow:0 0 6px var(--green); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.ga4-connect-btn { width:100%; background:var(--blue); color:#fff; border:none; border-radius:8px; padding:12px; font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:opacity .18s; }
+.ga4-connect-btn:hover { opacity:.88; }
+.ga4-connect-btn:disabled { opacity:.4; cursor:default; }
+.ga4-result { display:none; margin-top:14px; }
+.ga4-result.show { display:block; }
+.ga4-chart { margin-bottom:12px; }
+.ga4-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.ga4-row-label { font-size:11px; color:#aaa; width:80px; flex-shrink:0; }
+.ga4-bar-wrap { flex:1; background:var(--surface3); border-radius:4px; height:14px; overflow:hidden; }
+.ga4-bar { height:100%; border-radius:4px; transition:width .6s ease; }
+.ga4-bar.exit { background:var(--red); }
+.ga4-bar.reach { background:var(--blue); opacity:.6; }
+.ga4-row-val { font-size:11px; font-weight:700; width:36px; text-align:right; }
+.ai-suggest { background:rgba(255,59,48,.08); border:1px solid rgba(255,59,48,.2); border-radius:8px; padding:12px; font-size:12px; line-height:1.8; }
+.ai-suggest strong { color:var(--red); }
+.ai-tag { display:inline-block; background:rgba(255,59,48,.15); color:var(--red); border-radius:4px; padding:1px 6px; font-size:10px; font-weight:700; margin-right:4px; }
+
+/* HYBRID */
+.hybrid-source { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--muted); margin-bottom:4px; }
+.src-badge { font-size:10px; padding:2px 7px; border-radius:10px; font-weight:700; }
+.src-badge.ga4 { background:rgba(10,132,255,.2); color:var(--blue); }
+.src-badge.manual { background:rgba(255,59,48,.2); color:var(--red); }
+
+/* GENERATE BTN */
+.gen-btn { width:100%; background:linear-gradient(135deg,var(--red),var(--red-dark)); color:#fff; border:none; border-radius:12px; padding:16px; font-size:15px; font-weight:700; cursor:pointer; transition:opacity .18s,transform .1s; display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:16px; }
+.gen-btn:hover { opacity:.88; }
+.gen-btn:active { transform:scale(.98); }
+
+/* OUTPUT */
+.output-card { background:var(--surface); border:1px solid rgba(52,199,89,.3); border-radius:14px; padding:20px; display:none; }
+.output-card.show { display:block; }
+.output-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.output-ok { font-size:13px; font-weight:700; color:var(--green); }
+.copy-btn { background:var(--green); color:#000; border:none; border-radius:7px; padding:6px 14px; font-size:12px; font-weight:700; cursor:pointer; transition:opacity .18s; }
+.copy-btn:hover { opacity:.85; }
+.copy-btn.done { background:#2a9a4a; color:#fff; }
+.code-block { background:#080808; border:1px solid #1a1a1a; border-radius:8px; padding:12px; font-family:'SF Mono','Fira Code',monospace; font-size:11px; color:#7dd3fc; line-height:1.6; white-space:pre-wrap; word-break:break-all; max-height:160px; overflow-y:auto; margin-bottom:12px; }
+.paste-hint { font-size:12px; color:var(--muted); line-height:1.8; background:var(--surface2); border-radius:8px; padding:12px; }
+.paste-hint strong { color:#ccc; }
+
+/* PREVIEW */
+.phone-frame { width:100%; max-width:220px; margin:0 auto; background:#000; border-radius:28px; padding:10px 6px; border:5px solid #222; }
+.phone-notch { width:50px; height:5px; background:#222; border-radius:3px; margin:0 auto 6px; }
+.phone-screen { background:#eee; border-radius:18px; overflow:hidden; aspect-ratio:9/16; position:relative; display:flex; align-items:center; justify-content:center; }
+.phone-overlay { position:absolute; inset:0; background:rgba(0,0,0,.75); display:flex; align-items:center; justify-content:center; padding:10px; }
+.phone-popup { background:#fff; border-radius:10px; overflow:hidden; width:100%; position:relative; box-shadow:0 8px 24px rgba(0,0,0,.4); animation:atmIn .3s ease; }
+@keyframes atmIn { from{transform:scale(.88);opacity:0} to{transform:scale(1);opacity:1} }
+.phone-popup img { width:100%; display:block; }
+.phone-placeholder { aspect-ratio:4/3; background:linear-gradient(135deg,#1a1a1a,#2a2a2a); display:flex; align-items:center; justify-content:center; font-size:10px; color:#555; text-align:center; line-height:1.6; padding:12px; }
+.phone-x { position:absolute; top:6px; right:6px; width:20px; height:20px; background:rgba(0,0,0,.6); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:11px; }
+
+/* LOGIC DISPLAY */
+.logic-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px; margin-top:16px; }
+.logic-title { font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
+.logic-item { display:flex; gap:10px; margin-bottom:10px; font-size:12px; color:#aaa; align-items:flex-start; }
+.logic-num { width:20px; height:20px; border-radius:50%; background:var(--surface2); border:1px solid var(--border); font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:var(--red); }
+.logic-text strong { color:var(--text); display:block; margin-bottom:2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Atomoi<em>.</em>Popup <small>Beta</small></div>
+  <div class="hbadge">AI × GA4 融合型</div>
+</header>
+
+<div class="hero">
+  <div class="hero-eye">Hybrid Exit Intent Generator</div>
+  <h1>カスタム × GA4データ × AI<br><span>3つを融合した離脱検知</span></h1>
+  <p>GA4の実データをもとにAIが最適な検知タイミングを計算。<br>手動での細かい調整も可能なハイブリッド設計。</p>
+</div>
+
+<div class="main">
+  <!-- LEFT -->
+  <div>
+    <!-- 画像 -->
+    <div class="card">
+      <div class="card-label">ポップアップ画像</div>
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept="image/*" onchange="handleFile(this)">
+        <div class="upload-icon">🖼️</div>
+        <div class="upload-text"><strong>クリックまたはドロップ</strong>して画像を選択<br>JPG / PNG / WebP 対応</div>
+        <img id="uploadPreview" alt="">
+      </div>
+      <div class="or-div">または画像URLを直接入力</div>
+      <input type="url" id="imageUrl" placeholder="https://example.com/popup.jpg" oninput="onImageUrl()">
+    </div>
+
+    <!-- CTA -->
+    <div class="card">
+      <div class="card-label">クリック先URL</div>
+      <input type="url" id="ctaUrl" placeholder="https://example.com/lp">
+    </div>
+
+    <!-- 検知モード -->
+    <div class="card">
+      <div class="card-label">離脱検知モード</div>
+
+      <div class="mode-tabs">
+        <button class="mode-tab" onclick="setMode('custom',this)">
+          <span class="tab-icon">🎛️</span>カスタム
+        </button>
+        <button class="mode-tab" onclick="setMode('ga4',this)">
+          <span class="tab-icon">📊</span>GA4自動
+        </button>
+        <button class="mode-tab active" onclick="setMode('hybrid',this)">
+          <span class="tab-icon">🤖</span>ハイブリッド
+        </button>
+      </div>
+
+      <!-- カスタムモード -->
+      <div class="mode-panel" id="panel-custom">
+        <div class="field">
+          <label>発動するスクロール深度（%）</label>
+          <div class="slider-row">
+            <span class="slider-label">読了後に発動</span>
+            <div class="slider-wrap">
+              <input type="range" id="s-scroll" min="10" max="90" value="50" oninput="updateSlider('scroll',this.value,'%')">
+            </div>
+            <span class="slider-val" id="v-scroll">50%</span>
+          </div>
+          <div class="slider-row">
+            <span class="slider-label">上スクロール量</span>
+            <div class="slider-wrap">
+              <input type="range" id="s-up" min="50" max="500" step="50" value="200" oninput="updateSlider('up',this.value,'px')">
+            </div>
+            <span class="slider-val" id="v-up">200px</span>
+          </div>
+          <div class="slider-row">
+            <span class="slider-label">無操作タイマー</span>
+            <div class="slider-wrap">
+              <input type="range" id="s-idle" min="10" max="120" step="5" value="40" oninput="updateSlider('idle',this.value,'秒')">
+            </div>
+            <span class="slider-val" id="v-idle">40秒</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>検知パターン（個別ON/OFF）</label>
+          <div class="toggle-grid">
+            <div class="toggle-item on" onclick="togglePattern(this,'back')">
+              <span class="toggle-name">① バックボタン</span>
+              <div class="toggle-switch"></div>
+            </div>
+            <div class="toggle-item on" onclick="togglePattern(this,'vis')">
+              <span class="toggle-name">② タブ切替</span>
+              <div class="toggle-switch"></div>
+            </div>
+            <div class="toggle-item on" onclick="togglePattern(this,'scroll')">
+              <span class="toggle-name">③ 上スクロール</span>
+              <div class="toggle-switch"></div>
+            </div>
+            <div class="toggle-item on" onclick="togglePattern(this,'idle')">
+              <span class="toggle-name">④ 無操作</span>
+              <div class="toggle-switch"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GA4自動モード -->
+      <div class="mode-panel" id="panel-ga4">
+        <div class="ga4-box">
+          <div class="ga4-status">
+            <div class="status-dot off" id="ga4-dot"></div>
+            <span id="ga4-status-text">GA4と未接続</span>
+          </div>
+          <div class="field">
+            <label>GA4 プロパティID</label>
+            <input type="text" id="ga4-prop" placeholder="527488442">
+            <div class="field-hint">GA4管理画面 → プロパティ設定 → プロパティID</div>
+          </div>
+          <button class="ga4-connect-btn" id="ga4-btn" onclick="connectGA4()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Googleアカウントで接続する
+          </button>
+          <div class="ga4-result" id="ga4-result">
+            <div class="ga4-chart" id="ga4-chart"></div>
+            <div class="ai-suggest" id="ai-suggest"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ハイブリッドモード -->
+      <div class="mode-panel active" id="panel-hybrid">
+        <div class="ga4-box" style="margin-bottom:14px;">
+          <div class="ga4-status">
+            <div class="status-dot off" id="ga4h-dot"></div>
+            <span id="ga4h-status-text">GA4と未接続（接続でAI自動設定）</span>
+          </div>
+          <div class="field">
+            <label>GA4 プロパティID</label>
+            <input type="text" id="ga4h-prop" placeholder="527488442">
+          </div>
+          <button class="ga4-connect-btn" id="ga4h-btn" onclick="connectGA4Hybrid()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            GA4と接続してAI自動設定
+          </button>
+        </div>
+
+        <div class="field">
+          <div class="hybrid-source">
+            <span class="src-badge ga4" id="h-src-scroll">GA4</span>
+            <span style="font-size:12px;color:#aaa;">スクロール深度（AI推奨値）</span>
+          </div>
+          <div class="slider-row">
+            <span class="slider-label">発動深度</span>
+            <div class="slider-wrap"><input type="range" id="hs-scroll" min="10" max="90" value="50" oninput="updateSlider('hscroll',this.value,'%')"></div>
+            <span class="slider-val" id="hv-scroll">50%</span>
+          </div>
+          <div class="hybrid-source" style="margin-top:10px;">
+            <span class="src-badge ga4" id="h-src-up">GA4</span>
+            <span style="font-size:12px;color:#aaa;">上スクロール量（AI推奨値）</span>
+          </div>
+          <div class="slider-row">
+            <span class="slider-label">上スクロール量</span>
+            <div class="slider-wrap"><input type="range" id="hs-up" min="50" max="500" step="50" value="200" oninput="updateSlider('hup',this.value,'px')"></div>
+            <span class="slider-val" id="hv-up">200px</span>
+          </div>
+          <div class="hybrid-source" style="margin-top:10px;">
+            <span class="src-badge manual" id="h-src-idle">手動</span>
+            <span style="font-size:12px;color:#aaa;">無操作タイマー</span>
+          </div>
+          <div class="slider-row">
+            <span class="slider-label">無操作タイマー</span>
+            <div class="slider-wrap"><input type="range" id="hs-idle" min="10" max="120" step="5" value="40" oninput="updateSlider('hidle',this.value,'秒')"></div>
+            <span class="slider-val" id="hv-idle">40秒</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>検知パターン（個別ON/OFF）</label>
+          <div class="toggle-grid">
+            <div class="toggle-item on" onclick="togglePattern(this,'hback')"><span class="toggle-name">① バックボタン</span><div class="toggle-switch"></div></div>
+            <div class="toggle-item on" onclick="togglePattern(this,'hvis')"><span class="toggle-name">② タブ切替</span><div class="toggle-switch"></div></div>
+            <div class="toggle-item on" onclick="togglePattern(this,'hscrollp')"><span class="toggle-name">③ 上スクロール</span><div class="toggle-switch"></div></div>
+            <div class="toggle-item on" onclick="togglePattern(this,'hidlep')"><span class="toggle-name">④ 無操作</span><div class="toggle-switch"></div></div>
+          </div>
+        </div>
+
+        <div id="hybrid-ai-note" style="display:none;" class="ai-suggest" style="margin-top:10px;"></div>
+      </div>
+    </div>
+
+    <!-- 生成ボタン -->
+    <button class="gen-btn" onclick="generate()">⚡ コードを生成する</button>
+
+    <!-- 出力 -->
+    <div class="output-card" id="outputCard">
+      <div class="output-top">
+        <div class="output-ok">✅ コード生成完了</div>
+        <button class="copy-btn" id="copyBtn" onclick="copyCode()">コピー</button>
+      </div>
+      <div class="code-block" id="outputCode"></div>
+      <div class="paste-hint">
+        <strong>貼り付け先：</strong> SquadBeyond Javascript Body ／ GTM カスタムHTML ／ 任意のHTML<br>
+        <strong>それだけで</strong>離脱ユーザーへ自動でポップアップが表示されます
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="preview-col">
+    <div class="card">
+      <div class="card-label">スマホプレビュー</div>
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="phone-overlay">
+            <div class="phone-popup">
+              <div class="phone-placeholder" id="phonePlaceholder">画像を設定すると<br>ここに表示されます</div>
+              <img id="phoneImg" src="" alt="" style="display:none">
+              <div class="phone-x">×</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="logic-card">
+      <div class="logic-title">AI検知ロジック</div>
+      <div class="logic-item">
+        <div class="logic-num">1</div>
+        <div class="logic-text">
+          <strong>バックボタン検知</strong>
+          History APIで即座にキャッチ
+        </div>
+      </div>
+      <div class="logic-item">
+        <div class="logic-num">2</div>
+        <div class="logic-text">
+          <strong>タブ・アプリ切替</strong>
+          visibilitychangeイベントで検知
+        </div>
+      </div>
+      <div class="logic-item">
+        <div class="logic-num">3</div>
+        <div class="logic-text">
+          <strong>上スクロール検知</strong>
+          <span id="logic-scroll-desc">50%読了後に200px上スクロールで発動</span>
+        </div>
+      </div>
+      <div class="logic-item">
+        <div class="logic-num">4</div>
+        <div class="logic-text">
+          <strong>無操作タイマー</strong>
+          <span id="logic-idle-desc">50%読了後に40秒無操作で発動</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// =====================
+// STATE
+// =====================
+var currentMode = 'hybrid';
+var imageData   = '';
+var ga4Token    = '';
+var patterns    = { back:true, vis:true, scroll:true, idle:true, hback:true, hvis:true, hscrollp:true, hidlep:true };
+
+// =====================
+// MODE
+// =====================
+function setMode(mode, btn) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-tab').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  document.querySelectorAll('.mode-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById('panel-' + mode).classList.add('active');
+}
+
+// =====================
+// SLIDER
+// =====================
+function updateSlider(key, val, unit) {
+  var id = { scroll:'v-scroll', up:'v-up', idle:'v-idle', hscroll:'hv-scroll', hup:'hv-up', hidle:'hv-idle' }[key];
+  if(id) document.getElementById(id).textContent = val + unit;
+  updateLogicDesc();
+}
+
+function updateLogicDesc() {
+  var scrollEl = currentMode==='hybrid' ? document.getElementById('hs-scroll') : document.getElementById('s-scroll');
+  var idleEl   = currentMode==='hybrid' ? document.getElementById('hs-idle')   : document.getElementById('s-idle');
+  var upEl     = currentMode==='hybrid' ? document.getElementById('hs-up')     : document.getElementById('s-up');
+  if(!scrollEl) return;
+  document.getElementById('logic-scroll-desc').textContent = scrollEl.value+'%読了後に'+upEl.value+'px上スクロールで発動';
+  document.getElementById('logic-idle-desc').textContent   = scrollEl.value+'%読了後に'+idleEl.value+'秒無操作で発動';
+}
+
+// =====================
+// PATTERN TOGGLE
+// =====================
+function togglePattern(el, key) {
+  el.classList.toggle('on');
+  patterns[key] = el.classList.contains('on');
+}
+
+// =====================
+// IMAGE
+// =====================
+function handleFile(input) {
+  var file = input.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    imageData = e.target.result;
+    document.getElementById('uploadPreview').src = imageData;
+    document.getElementById('uploadPreview').style.display = 'block';
+    document.getElementById('imageUrl').value = '';
+    updatePhonePreview(imageData);
+  };
+  reader.readAsDataURL(file);
+}
+
+function onImageUrl() {
+  var url = document.getElementById('imageUrl').value.trim();
+  if(url) { imageData=''; document.getElementById('uploadPreview').style.display='none'; updatePhonePreview(url); }
+}
+
+function updatePhonePreview(src) {
+  var img = document.getElementById('phoneImg');
+  var ph  = document.getElementById('phonePlaceholder');
+  img.onload  = function(){ img.style.display='block'; ph.style.display='none'; };
+  img.onerror = function(){ img.style.display='none'; ph.style.display='flex'; };
+  img.src = src;
+}
+
+// Drag & Drop
+var zone = document.getElementById('uploadZone');
+zone.addEventListener('dragover', function(e){ e.preventDefault(); zone.classList.add('drag'); });
+zone.addEventListener('dragleave', function(){ zone.classList.remove('drag'); });
+zone.addEventListener('drop', function(e){
+  e.preventDefault(); zone.classList.remove('drag');
+  var f = e.dataTransfer.files[0];
+  if(f && f.type.startsWith('image/')){ handleFile({files:[f]}); }
+});
+
+// =====================
+// GA4 CONNECT（GA4モード）
+// =====================
+function connectGA4() {
+  var propId = document.getElementById('ga4-prop').value.trim();
+  if(!propId){ alert('プロパティIDを入力してください'); return; }
+  setGA4Status('ga4','connecting','接続中...');
+  document.getElementById('ga4-btn').disabled = true;
+
+  // Google OAuth2 (GIS)
+  google.accounts.oauth2.initTokenClient({
+    // ※ 本番運用時はご自身のOAuth2クライアントIDに置き換えてください
+    client_id: 'YOUR_GOOGLE_OAUTH_CLIENT_ID',
+    scope: 'https://www.googleapis.com/auth/analytics.readonly',
+    callback: function(resp) {
+      if(resp.error){ setGA4Status('ga4','off','接続エラー'); document.getElementById('ga4-btn').disabled=false; return; }
+      ga4Token = resp.access_token;
+      fetchGA4Data(propId, 'ga4');
+    }
+  }).requestAccessToken();
+}
+
+function connectGA4Hybrid() {
+  var propId = document.getElementById('ga4h-prop').value.trim();
+  if(!propId){ alert('プロパティIDを入力してください'); return; }
+  setGA4Status('ga4h','connecting','接続中...');
+  document.getElementById('ga4h-btn').disabled = true;
+
+  google.accounts.oauth2.initTokenClient({
+    client_id: 'YOUR_GOOGLE_OAUTH_CLIENT_ID',
+    scope: 'https://www.googleapis.com/auth/analytics.readonly',
+    callback: function(resp) {
+      if(resp.error){ setGA4Status('ga4h','off','接続エラー'); document.getElementById('ga4h-btn').disabled=false; return; }
+      ga4Token = resp.access_token;
+      fetchGA4Data(propId, 'hybrid');
+    }
+  }).requestAccessToken();
+}
+
+function setGA4Status(prefix, state, text) {
+  var dot  = document.getElementById(prefix+'-dot');
+  var span = document.getElementById(prefix+'-status-text');
+  dot.className = 'status-dot ' + state;
+  span.textContent = text;
+}
+
+// =====================
+// GA4 DATA FETCH & AI
+// =====================
+function fetchGA4Data(propId, mode) {
+  var url = 'https://analyticsdata.googleapis.com/v1beta/properties/'+propId+':runReport';
+  var body = JSON.stringify({
+    dateRanges:[{startDate:'30daysAgo', endDate:'today'}],
+    dimensions:[{name:'eventName'}],
+    metrics:[{name:'eventCount'}]
+  });
+  fetch(url, {
+    method:'POST',
+    headers:{ 'Authorization':'Bearer '+ga4Token, 'Content-Type':'application/json' },
+    body: body
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    var events = {};
+    if(data.rows) data.rows.forEach(function(row){
+      events[row.dimensionValues[0].value] = parseInt(row.metricValues[0].value);
+    });
+    processGA4Data(events, mode, propId);
+  })
+  .catch(function(){ setGA4Status(mode==='hybrid'?'ga4h':'ga4','off','取得エラー'); });
+}
+
+function processGA4Data(events, mode, propId) {
+  var lp   = events['black_lp_view'] || events['page_view'] || 100;
+  var s25  = events['scroll_25']  || 0;
+  var s50  = events['scroll_50']  || 0;
+  var s75  = events['scroll_75']  || 0;
+  var s100 = events['scroll_100'] || 0;
+
+  // 各区間の離脱数
+  var exit0_25  = lp  - s25;
+  var exit25_50 = s25 - s50;
+  var exit50_75 = s50 - s75;
+  var exit75_100= s75 - s100;
+  var maxExit   = Math.max(exit0_25, exit25_50, exit50_75, exit75_100);
+
+  // AI推奨スクロール深度（離脱が最多な区間の直前）
+  var aiScroll = 50, aiLabel = '50%（中間）';
+  if(maxExit === exit0_25)   { aiScroll=20; aiLabel='20%（冒頭離脱が最多）'; }
+  else if(maxExit === exit25_50) { aiScroll=40; aiLabel='40%（前半離脱が最多）'; }
+  else if(maxExit === exit50_75) { aiScroll=55; aiLabel='55%（中盤離脱が最多）'; }
+  else if(maxExit === exit75_100){ aiScroll=72; aiLabel='72%（後半離脱が最多）'; }
+
+  var prefix = (mode==='hybrid') ? 'ga4h' : 'ga4';
+  setGA4Status(prefix, 'on', 'GA4接続済み（プロパティ: '+propId+'）');
+  document.getElementById(prefix+'-btn').disabled = false;
+
+  if(mode === 'ga4') {
+    // GA4モード：チャートとAI提案を表示
+    showGA4Chart(events, lp, exit0_25, exit25_50, exit50_75, exit75_100, aiLabel);
+  } else {
+    // ハイブリッドモード：スライダーをAI推奨値に自動設定
+    document.getElementById('hs-scroll').value = aiScroll;
+    document.getElementById('hv-scroll').textContent = aiScroll+'%';
+    document.getElementById('h-src-scroll').textContent = 'GA4';
+    document.getElementById('h-src-scroll').className = 'src-badge ga4';
+    document.getElementById('h-src-up').textContent = 'GA4';
+    document.getElementById('h-src-up').className = 'src-badge ga4';
+    updateLogicDesc();
+
+    var note = document.getElementById('hybrid-ai-note');
+    note.style.display = 'block';
+    note.innerHTML = '<span class="ai-tag">AI推奨</span> 離脱が最も多い区間に基づき<strong style="color:var(--red)">'+aiScroll+'%到達後</strong>を発動ポイントに設定しました。スライダーで手動調整も可能です。';
+  }
+}
+
+function showGA4Chart(events, lp, e0, e25, e50, e75, aiLabel) {
+  var maxExit = Math.max(e0, e25, e50, e75) || 1;
+  var chartHtml = '<div style="margin-bottom:10px;font-size:11px;color:var(--muted);">LP閲覧からの脱落分布（過去30日）</div>';
+  var rows = [
+    { label:'LP→25%', exits:e0,  reachPct: Math.round((events['scroll_25']||0)/lp*100) },
+    { label:'25→50%', exits:e25, reachPct: Math.round((events['scroll_50']||0)/lp*100) },
+    { label:'50→75%', exits:e50, reachPct: Math.round((events['scroll_75']||0)/lp*100) },
+    { label:'75→100%',exits:e75, reachPct: Math.round((events['scroll_100']||0)/lp*100) },
+  ];
+  rows.forEach(function(r){
+    var barW = Math.round(r.exits/maxExit*100);
+    chartHtml += '<div class="ga4-row"><span class="ga4-row-label">'+r.label+'</span><div class="ga4-bar-wrap"><div class="ga4-bar exit" style="width:'+barW+'%"></div></div><span class="ga4-row-val">'+r.exits+'人</span></div>';
+  });
+
+  document.getElementById('ga4-chart').innerHTML = chartHtml;
+  document.getElementById('ai-suggest').innerHTML =
+    '<span class="ai-tag">AI判定</span> 離脱が最多なポイント：<strong style="color:var(--red)">'+ aiLabel +'</strong><br>ハイブリッドモードでこの値を自動設定できます。';
+  document.getElementById('ga4-result').classList.add('show');
+}
+
+// =====================
+// GENERATE
+// =====================
+function generate() {
+  var imgSrc = imageData || document.getElementById('imageUrl').value.trim();
+  var ctaUrl = document.getElementById('ctaUrl').value.trim();
+  if(!imgSrc){ alert('画像をアップロードするかURLを入力してください'); return; }
+  if(!ctaUrl){ alert('クリック先URLを入力してください'); return; }
+
+  var cfg = getConfig();
+  var code = buildCode(imgSrc, ctaUrl, cfg);
+  document.getElementById('outputCode').textContent = code;
+  document.getElementById('outputCard').classList.add('show');
+  setTimeout(function(){ document.getElementById('outputCard').scrollIntoView({behavior:'smooth',block:'nearest'}); }, 50);
+}
+
+function getConfig() {
+  if(currentMode === 'custom') {
+    return {
+      scroll: document.getElementById('s-scroll').value/100,
+      upPx:   parseInt(document.getElementById('s-up').value),
+      idle:   parseInt(document.getElementById('s-idle').value)*1000,
+      back:   patterns.back, vis:patterns.vis, scrollP:patterns.scroll, idleP:patterns.idle
+    };
+  } else {
+    return {
+      scroll: document.getElementById('hs-scroll').value/100,
+      upPx:   parseInt(document.getElementById('hs-up').value),
+      idle:   parseInt(document.getElementById('hs-idle').value)*1000,
+      back:   patterns.hback, vis:patterns.hvis, scrollP:patterns.hscrollp, idleP:patterns.hidlep
+    };
+  }
+}
+
+function buildCode(imgSrc, ctaUrl, c) {
+  var parts = [];
+  if(c.back)    parts.push("history.pushState({a:1},'');window.addEventListener('popstate',function(){show();history.pushState({a:1},'');});");
+  if(c.vis)     parts.push("document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')show();});");
+  if(c.scrollP) parts.push("var mx=0,rh=false;window.addEventListener('scroll',function(){var y=window.scrollY,h=document.documentElement.scrollHeight-window.innerHeight;if(h>0&&y/h>=S)rh=true;if(y>mx)mx=y;if(rh&&mx-y>U)show();},{passive:true});");
+  if(c.idleP)   parts.push("var t=null,ir=false;function ri(){var h=document.documentElement.scrollHeight-window.innerHeight;if(h>0&&window.scrollY/h>=S)ir=true;if(!ir)return;clearTimeout(t);t=setTimeout(show,I);}window.addEventListener('scroll',ri,{passive:true});document.addEventListener('touchstart',ri,{passive:true});");
+
+  return `<!-- Atomoi Popup -->
+<style>
+#atm-o{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:99999;align-items:center;justify-content:center}
+#atm-o.show{display:flex}
+#atm-b{position:relative;width:88%;max-width:360px;border-radius:14px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.5);animation:atmIn .22s ease}
+@keyframes atmIn{from{transform:scale(.88);opacity:0}to{transform:scale(1);opacity:1}}
+#atm-b img{display:block;width:100%;cursor:pointer}
+#atm-x{position:absolute;top:10px;right:10px;width:28px;height:28px;background:rgba(0,0,0,.6);border:none;border-radius:50%;color:#fff;font-size:16px;cursor:pointer;line-height:28px;text-align:center}
+</style>
+<div id="atm-o">
+  <div id="atm-b">
+    <img src="${imgSrc}" onclick="location.href='${ctaUrl}'">
+    <button id="atm-x" onclick="document.getElementById('atm-o').classList.remove('show')">×</button>
+  </div>
+</div>
+<script>
+(function(){
+  var o=document.getElementById('atm-o'),shown=false;
+  var S=${c.scroll},U=${c.upPx},I=${c.idle};
+  function show(){if(shown)return;shown=true;o.classList.add('show');}
+  o.addEventListener('click',function(e){if(e.target===o)o.classList.remove('show');});
+  ${parts.join('\n  ')}
+})();
+<\/script>
+<!-- /Atomoi Popup -->`;
+}
+
+// =====================
+// COPY
+// =====================
+function copyCode() {
+  navigator.clipboard.writeText(document.getElementById('outputCode').textContent).then(function(){
+    var btn = document.getElementById('copyBtn');
+    btn.textContent='コピー済み ✓'; btn.classList.add('done');
+    setTimeout(function(){ btn.textContent='コピー'; btn.classList.remove('done'); }, 2500);
+  });
+}
+</script>
+</body>
+</html>
