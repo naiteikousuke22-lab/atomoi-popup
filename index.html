@@ -1202,7 +1202,7 @@ function buildCode(imgSrc, ctaUrl, c) {
 </style>
 <div id="atm-o">
   <div id="atm-b">
-    <img src="${imgSrc}" onclick="location.href='${ctaUrl}'">
+    <img src="${imgSrc}" onclick="if(window.gtag)gtag('event','atm_click',{project:'${c.projectKey}'});if(window.dataLayer)dataLayer.push({event:'atm_click',atm_project:'${c.projectKey}'});location.href='${ctaUrl}'">
     <button id="atm-x" onclick="document.getElementById('atm-o').classList.remove('show')">×</button>
   </div>
 </div>
@@ -1220,6 +1220,8 @@ function buildCode(imgSrc, ctaUrl, c) {
     cnt++;
     localStorage.setItem(KEY,cnt);
     o.classList.add('show');
+    if(window.gtag)gtag('event','atm_show',{project:KEY,count:cnt});
+    if(window.dataLayer)dataLayer.push({event:'atm_show',atm_project:KEY,atm_count:cnt});
   }
   o.addEventListener('click',function(e){if(e.target===o)o.classList.remove('show');});
   ${parts.join('\n  ')}
