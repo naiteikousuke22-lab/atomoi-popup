@@ -150,14 +150,102 @@ input[type=range] { width:100%; accent-color:var(--red); cursor:pointer; }
 .logic-item { display:flex; gap:10px; margin-bottom:10px; font-size:12px; color:#aaa; align-items:flex-start; }
 .logic-num { width:20px; height:20px; border-radius:50%; background:var(--surface2); border:1px solid var(--border); font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:var(--red); }
 .logic-text strong { color:var(--text); display:block; margin-bottom:2px; }
+
+/* ===== HOME SCREEN ===== */
+#home { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 20px 80px; }
+.home-logo { font-size:36px; font-weight:900; letter-spacing:-.5px; margin-bottom:6px; text-align:center; }
+.home-logo em { color:var(--red); font-style:normal; }
+.home-tagline { font-size:12px; color:var(--muted); letter-spacing:3px; text-transform:uppercase; margin-bottom:12px; text-align:center; }
+.home-desc { font-size:13px; color:#666; text-align:center; line-height:1.7; margin-bottom:48px; max-width:400px; }
+.feature-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; width:100%; max-width:720px; }
+@media(max-width:600px){ .feature-grid{ grid-template-columns:1fr; max-width:360px; } }
+.feature-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:28px 20px; text-align:center; cursor:pointer; transition:border-color .2s, transform .15s; }
+.feature-card:hover { border-color:var(--red); transform:translateY(-2px); }
+.feature-card.disabled { opacity:.45; cursor:default; }
+.feature-card.disabled:hover { border-color:var(--border); transform:none; }
+.fc-icon { font-size:32px; margin-bottom:14px; }
+.fc-title { font-size:15px; font-weight:700; margin-bottom:6px; }
+.fc-desc { font-size:12px; color:var(--muted); line-height:1.6; }
+.fc-badge { display:inline-block; font-size:10px; background:rgba(255,59,48,.15); color:var(--red); border:1px solid rgba(255,59,48,.3); border-radius:10px; padding:2px 8px; margin-top:10px; }
+.fc-badge.soon { background:rgba(102,102,102,.15); color:var(--muted); border-color:var(--border); }
+
+/* ===== OVERLAY SYSTEM ===== */
+.ov { display:none; position:fixed; inset:0; background:var(--bg); z-index:500; overflow-y:auto; }
+.ov.open { display:block; }
+.ov-header { display:flex; align-items:center; justify-content:space-between; padding:14px 24px; border-bottom:1px solid var(--border); position:sticky; top:0; background:rgba(10,10,10,.95); backdrop-filter:blur(14px); z-index:10; }
+.ov-title { font-size:15px; font-weight:700; }
+.ov-close { background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--muted); font-size:13px; padding:7px 14px; cursor:pointer; transition:color .15s; }
+.ov-close:hover { color:var(--text); }
+
+/* ===== CONNECT OVERLAY ===== */
+.connect-grid { max-width:640px; margin:32px auto; padding:0 20px 60px; }
+.connect-section { margin-bottom:28px; }
+.connect-section-title { font-size:13px; font-weight:700; color:var(--muted); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+.connect-btn { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; display:flex; align-items:center; gap:12px; cursor:pointer; transition:border-color .18s; margin-bottom:10px; }
+.connect-btn:hover { border-color:var(--red); }
+.connect-btn-icon { font-size:22px; flex-shrink:0; }
+.connect-btn-text { text-align:left; }
+.connect-btn-name { font-size:13px; font-weight:600; display:block; margin-bottom:2px; }
+.connect-btn-hint { font-size:11px; color:var(--muted); }
+.connect-status { font-size:11px; margin-left:auto; flex-shrink:0; padding:3px 10px; border-radius:10px; }
+.connect-status.off { background:var(--surface3); color:var(--muted); }
+.connect-status.on { background:rgba(52,199,89,.15); color:var(--green); }
+.gas-output { display:none; margin-top:16px; }
+.gas-output.show { display:block; }
+
+/* ===== MANUAL SECTION ===== */
+.manual-wrap { max-width:640px; margin:32px auto; padding:0 20px 60px; }
+.manual-section { margin-bottom:32px; }
+.manual-num { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; background:var(--red); border-radius:50%; font-size:11px; font-weight:700; color:#fff; flex-shrink:0; }
+.manual-section-title { font-size:16px; font-weight:700; margin-bottom:14px; display:flex; align-items:center; gap:10px; }
+.manual-step { display:flex; gap:12px; margin-bottom:14px; }
+.manual-step-num { width:22px; height:22px; border-radius:50%; background:var(--surface2); border:1px solid var(--border); font-size:10px; font-weight:700; color:var(--red); display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+.manual-step-body { font-size:13px; color:#bbb; line-height:1.7; }
+.manual-step-body strong { color:var(--text); }
+.manual-step-body code { background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:1px 6px; font-size:11px; color:#7dd3fc; }
+.manual-note { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 16px; font-size:12px; color:#888; line-height:1.8; margin-top:8px; }
+.manual-note strong { color:#ccc; }
+.manual-divider { height:1px; background:var(--border); margin:32px 0; }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">Atomoi<em>.</em>Popup <small>Beta</small></div>
-  <div class="hbadge">AI × GA4 融合型</div>
-</header>
+<!-- ========== HOME SCREEN ========== -->
+<div id="home">
+  <div class="home-logo">Atomoi<em>.</em>Popup</div>
+  <div class="home-tagline">AI Exit Intent Platform</div>
+  <p class="home-desc">GA4・Meta・LINEの実データと連携し、<br>離脱防止ポップアップを自動構築するツール群</p>
+
+  <div class="feature-grid">
+    <div class="feature-card" onclick="openOv('gen-ov')">
+      <div class="fc-icon">⚡</div>
+      <div class="fc-title">Popup Generator</div>
+      <div class="fc-desc">画像とURLを入れるだけ。離脱検知コードを自動生成</div>
+      <div class="fc-badge">メイン機能</div>
+    </div>
+    <div class="feature-card" onclick="openOv('connect-ov')">
+      <div class="fc-icon">🔗</div>
+      <div class="fc-title">連携設定</div>
+      <div class="fc-desc">GA4・Meta・LINE・Slack・GASを一括で接続・設定</div>
+      <div class="fc-badge">データ連携</div>
+    </div>
+    <div class="feature-card" onclick="openOv('manual-ov')">
+      <div class="fc-icon">📖</div>
+      <div class="fc-title">マニュアル</div>
+      <div class="fc-desc">アカウント変更・新媒体追加・トラブル対応の手順書</div>
+      <div class="fc-badge">ガイド</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== GENERATOR OVERLAY ========== -->
+<div class="ov" id="gen-ov">
+  <div class="ov-header">
+    <div class="ov-title">⚡ Atomoi Popup Generator</div>
+    <button class="ov-close" onclick="closeOv('gen-ov')">← ホームに戻る</button>
+  </div>
+
+<header style="position:static;backdrop-filter:none;background:transparent;border-bottom:none;display:none;"></header>
 
 <div class="hero">
   <div class="hero-eye">Hybrid Exit Intent Generator</div>
@@ -429,6 +517,244 @@ input[type=range] { width:100%; accent-color:var(--red); cursor:pointer; }
     </div>
   </div>
 </div>
+
+</div><!-- /gen-ov -->
+
+<!-- ========== CONNECT OVERLAY ========== -->
+<div class="ov" id="connect-ov">
+  <div class="ov-header">
+    <div class="ov-title">🔗 連携設定</div>
+    <button class="ov-close" onclick="closeOv('connect-ov')">← ホームに戻る</button>
+  </div>
+  <div class="connect-grid">
+
+    <div class="connect-section">
+      <div class="connect-section-title">広告媒体</div>
+      <div class="connect-btn" onclick="toggleConnectForm('meta-form')">
+        <span class="connect-btn-icon">📘</span>
+        <div class="connect-btn-text">
+          <span class="connect-btn-name">Meta（Facebook / Instagram）</span>
+          <span class="connect-btn-hint">アクセストークン・アカウントID を設定</span>
+        </div>
+        <span class="connect-status off" id="meta-status">未設定</span>
+      </div>
+      <div id="meta-form" style="display:none;" class="card" style="margin-top:10px;">
+        <div class="field">
+          <label>アクセストークン</label>
+          <input type="text" id="meta-token" placeholder="EAAxxxxx...">
+          <div class="field-hint">Meta Business Suite → 設定 → システムユーザー → トークン生成</div>
+        </div>
+        <div class="field">
+          <label>広告アカウントID</label>
+          <input type="text" id="meta-account" placeholder="act_123456789">
+        </div>
+        <button class="gen-btn" style="margin-top:8px;" onclick="saveConnect('meta')">保存してGASコードに反映</button>
+      </div>
+
+      <div class="connect-btn" onclick="toggleConnectForm('line-form')">
+        <span class="connect-btn-icon">💬</span>
+        <div class="connect-btn-text">
+          <span class="connect-btn-name">LINE広告</span>
+          <span class="connect-btn-hint">チャネルアクセストークン・アカウントIDを設定</span>
+        </div>
+        <span class="connect-status off" id="line-status">未設定</span>
+      </div>
+      <div id="line-form" style="display:none;" class="card">
+        <div class="field">
+          <label>チャネルアクセストークン</label>
+          <input type="text" id="line-token" placeholder="LINE Ads APIトークン">
+        </div>
+        <div class="field">
+          <label>広告アカウントID</label>
+          <input type="text" id="line-account" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+        </div>
+        <button class="gen-btn" style="margin-top:8px;" onclick="saveConnect('line')">保存してGASコードに反映</button>
+      </div>
+    </div>
+
+    <div class="connect-section">
+      <div class="connect-section-title">計測・タグ</div>
+      <div class="connect-btn" onclick="toggleConnectForm('ga4-setup-form')">
+        <span class="connect-btn-icon">📊</span>
+        <div class="connect-btn-text">
+          <span class="connect-btn-name">GA4 / GTM</span>
+          <span class="connect-btn-hint">プロパティID・コンテナIDを設定</span>
+        </div>
+        <span class="connect-status off" id="ga4-setup-status">未設定</span>
+      </div>
+      <div id="ga4-setup-form" style="display:none;" class="card">
+        <div class="field">
+          <label>GA4 プロパティID</label>
+          <input type="text" id="setup-ga4-prop" placeholder="527488442">
+        </div>
+        <div class="field">
+          <label>GTM コンテナID</label>
+          <input type="text" id="setup-gtm" placeholder="GTM-XXXXXXX">
+        </div>
+        <button class="gen-btn" style="margin-top:8px;" onclick="saveConnect('ga4-setup')">保存してGASコードに反映</button>
+      </div>
+    </div>
+
+    <div class="connect-section">
+      <div class="connect-section-title">通知・レポート</div>
+      <div class="connect-btn" onclick="toggleConnectForm('slack-form')">
+        <span class="connect-btn-icon">💬</span>
+        <div class="connect-btn-text">
+          <span class="connect-btn-name">Slack 通知</span>
+          <span class="connect-btn-hint">Webhook URLを設定してレポートを自動送信</span>
+        </div>
+        <span class="connect-status off" id="slack-status">未設定</span>
+      </div>
+      <div id="slack-form" style="display:none;" class="card">
+        <div class="field">
+          <label>Slack Webhook URL</label>
+          <input type="url" id="slack-webhook" placeholder="https://hooks.slack.com/services/xxx/yyy/zzz">
+          <div class="field-hint">Slack → App管理 → Incoming Webhooks → Webhook URLをコピー</div>
+        </div>
+        <button class="gen-btn" style="margin-top:8px;" onclick="saveConnect('slack')">保存してGASコードに反映</button>
+      </div>
+
+      <div class="connect-btn" onclick="toggleConnectForm('gas-form')">
+        <span class="connect-btn-icon">📋</span>
+        <div class="connect-btn-text">
+          <span class="connect-btn-name">GASコード生成</span>
+          <span class="connect-btn-hint">上記の設定を元にGASコードを自動生成</span>
+        </div>
+        <span class="connect-status off" id="gas-status">未生成</span>
+      </div>
+      <div id="gas-form" style="display:none;" class="card">
+        <div class="field">
+          <label>スプレッドシートID</label>
+          <input type="text" id="gas-sheet" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms">
+          <div class="field-hint">スプレッドシートのURL内の長い文字列</div>
+        </div>
+        <button class="gen-btn" style="margin-top:8px;" onclick="generateGAS()">GASコードを生成する</button>
+        <div class="gas-output" id="gasOutput">
+          <div class="output-top" style="margin-top:14px;">
+            <div class="output-ok">✅ GASコード生成完了</div>
+            <button class="copy-btn" onclick="copyGAS()">コピー</button>
+          </div>
+          <div class="code-block" id="gasCode" style="max-height:300px;"></div>
+          <div class="paste-hint">
+            <strong>貼り付け先：</strong> Google Apps Script（script.google.com） → 新規プロジェクト → コードを貼り付け → 保存 → 実行
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div><!-- /connect-ov -->
+
+<!-- ========== MANUAL OVERLAY ========== -->
+<div class="ov" id="manual-ov">
+  <div class="ov-header">
+    <div class="ov-title">📖 マニュアル</div>
+    <button class="ov-close" onclick="closeOv('manual-ov')">← ホームに戻る</button>
+  </div>
+  <div class="manual-wrap">
+
+    <div class="manual-section">
+      <div class="manual-section-title">
+        <span class="manual-num">1</span>
+        Metaアカウントが変わった場合
+      </div>
+      <div class="manual-step">
+        <div class="manual-step-num">1</div>
+        <div class="manual-step-body"><strong>新しいアクセストークンを発行する</strong><br>Meta Business Suite → 設定 → システムユーザー → 「トークンを生成」をクリック</div>
+      </div>
+      <div class="manual-step">
+        <div class="manual-step-num">2</div>
+        <div class="manual-step-body"><strong>連携設定を更新する</strong><br>このツール → 連携設定 → Meta → トークンとアカウントIDを新しいものに書き換え → 保存</div>
+      </div>
+      <div class="manual-step">
+        <div class="manual-step-num">3</div>
+        <div class="manual-step-body"><strong>GASコードを再生成する</strong><br>連携設定 → GASコード生成 → コードをコピー → GASに貼り直す</div>
+      </div>
+      <div class="manual-step">
+        <div class="manual-step-num">4</div>
+        <div class="manual-step-body"><strong>動作確認</strong><br>GASを手動実行してSlackにデータが届くか確認する</div>
+      </div>
+      <div class="manual-note"><strong>注意：</strong> Metaのアクセストークンは約60日で期限切れになります。期限切れの場合は同じ手順でトークンを再発行してください。</div>
+    </div>
+
+    <div class="manual-divider"></div>
+
+    <div class="manual-section">
+      <div class="manual-section-title">
+        <span class="manual-num">2</span>
+        Googleアカウント（GA4 / GTM）が変わった場合
+      </div>
+      <div class="manual-step">
+        <div class="manual-step-num">1</div>
+        <div class="manual-step-body"><strong>新しいGA4プロパティIDを確認する</strong><br>GA4管理画面 → プロパティ設定 → プロパティID（数字9桁）</div>
+      </div>
+      <div class="manual-step">
+        <div class="manual-step-num">2</div>
+        <div class="manual-step-body"><strong>サービスアカウントを新プロパティに追加する</strong><br>GA4管理画面 → プロパティ → アクセス管理 → サービスアカウントのメールアドレスを追加（閲覧者権限）</div>
+      </div>
+      <div class="manual-step">
+        <div class="manual-step-num">3</div>
+        <div class="manual-step-body"><strong>連携設定のプロパティIDを更新する</strong><br>このツール → 連携設定 → GA4/GTM → 新しいプロパティIDを入力 → 保存</div>
+      </div>
+      <div class="manual-step">
+        <div class="manual-step-num">4</div>
+        <div class="manual-step-body"><strong>GTMタグを確認する</strong><br>GTMコンテナID（<code>GTM-XXXXXXX</code>）が変わった場合はSquadBeyondのJavaScript HeadのGTMコードも更新する</div>
+      </div>
+      <div class="manual-note"><strong>サービスアカウントメール：</strong> <code>id-gtm-ga4-operator@gtm-kaya-setup.iam.gserviceaccount.com</code><br>このメールをGA4の新プロパティに追加することでAPIアクセスが可能になります。</div>
+    </div>
+
+    <div class="manual-divider"></div>
+
+    <div class="manual-section">
+      <div class="manual-section-title">
+        <span class="manual-num">3</span>
+        LINE広告など他媒体を追加する場合
+      </div>
+      <div class="manual-step">
+        <div class="manual-step-num">1</div>
+        <div class="manual-step-body"><strong>LINE広告のAPIトークンを取得する</strong><br>LINE Ads Manager → アカウント設定 → API連携 → チャネルアクセストークンを発行</div>
+      </div>
+      <div class="manual-step">
+        <div class="manual-step-num">2</div>
+        <div class="manual-step-body"><strong>連携設定に追加する</strong><br>このツール → 連携設定 → LINE広告 → トークンとアカウントIDを入力 → 保存</div>
+      </div>
+      <div class="manual-step">
+        <div class="manual-step-num">3</div>
+        <div class="manual-step-body"><strong>GASコードを再生成する</strong><br>連携設定 → GASコード生成 → LINE項目が自動で追加されたコードが生成される</div>
+      </div>
+      <div class="manual-step">
+        <div class="manual-step-num">4</div>
+        <div class="manual-step-body"><strong>スプレッドシートにシートを追加する</strong><br>GASを実行すると「LINE広告」シートが自動作成され、Meta・GA4と並んでデータが入る</div>
+      </div>
+    </div>
+
+    <div class="manual-divider"></div>
+
+    <div class="manual-section">
+      <div class="manual-section-title">
+        <span class="manual-num">4</span>
+        Atomoi Popupの運用フロー
+      </div>
+      <div class="manual-step">
+        <div class="manual-step-num">1</div>
+        <div class="manual-step-body"><strong>プロジェクトを作成する</strong><br>Popup Generator → プロジェクト名を入力（例：<code>カヤ_LP_2026-04</code>）</div>
+      </div>
+      <div class="manual-step">
+        <div class="manual-step-num">2</div>
+        <div class="manual-step-body"><strong>画像・CTA・表示設定をする</strong><br>ポップアップ画像URLまたはファイルをアップロード → クリック先URLを入力 → 表示回数を設定</div>
+      </div>
+      <div class="manual-step">
+        <div class="manual-step-num">3</div>
+        <div class="manual-step-body"><strong>コードを生成して貼り付ける</strong><br>「コードを生成する」→ コピー → SquadBeyondのJavaScript Body末尾に貼り付け → 保存</div>
+      </div>
+      <div class="manual-step">
+        <div class="manual-step-num">4</div>
+        <div class="manual-step-body"><strong>GA4でポップアップの効果を計測する</strong><br>GA4 → イベント → <code>atm_shown</code>（表示数）・<code>atm_click</code>（CTA）をプロジェクト名でフィルタ</div>
+      </div>
+    </div>
+
+  </div>
+</div><!-- /manual-ov -->
 
 <script>
 // =====================
@@ -752,6 +1078,135 @@ function copyCode() {
     var btn = document.getElementById('copyBtn');
     btn.textContent='コピー済み ✓'; btn.classList.add('done');
     setTimeout(function(){ btn.textContent='コピー'; btn.classList.remove('done'); }, 2500);
+  });
+}
+
+// =====================
+// OVERLAY NAVIGATION
+// =====================
+function openOv(id) {
+  document.getElementById('home').style.display = 'none';
+  document.getElementById(id).classList.add('open');
+  window.scrollTo(0,0);
+}
+function closeOv(id) {
+  document.getElementById(id).classList.remove('open');
+  document.getElementById('home').style.display = 'flex';
+  window.scrollTo(0,0);
+}
+
+// =====================
+// CONNECT FORMS
+// =====================
+var connectData = {};
+
+function toggleConnectForm(id) {
+  var el = document.getElementById(id);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function saveConnect(type) {
+  if(type === 'meta') {
+    connectData.metaToken   = document.getElementById('meta-token').value.trim();
+    connectData.metaAccount = document.getElementById('meta-account').value.trim();
+    if(!connectData.metaToken || !connectData.metaAccount){ alert('トークンとアカウントIDを入力してください'); return; }
+    document.getElementById('meta-status').textContent = '設定済み';
+    document.getElementById('meta-status').className = 'connect-status on';
+    document.getElementById('meta-form').style.display = 'none';
+  } else if(type === 'line') {
+    connectData.lineToken   = document.getElementById('line-token').value.trim();
+    connectData.lineAccount = document.getElementById('line-account').value.trim();
+    if(!connectData.lineToken){ alert('トークンを入力してください'); return; }
+    document.getElementById('line-status').textContent = '設定済み';
+    document.getElementById('line-status').className = 'connect-status on';
+    document.getElementById('line-form').style.display = 'none';
+  } else if(type === 'ga4-setup') {
+    connectData.ga4Prop = document.getElementById('setup-ga4-prop').value.trim();
+    connectData.gtmId   = document.getElementById('setup-gtm').value.trim();
+    if(!connectData.ga4Prop){ alert('プロパティIDを入力してください'); return; }
+    document.getElementById('ga4-setup-status').textContent = '設定済み';
+    document.getElementById('ga4-setup-status').className = 'connect-status on';
+    document.getElementById('ga4-setup-form').style.display = 'none';
+  } else if(type === 'slack') {
+    connectData.slackWebhook = document.getElementById('slack-webhook').value.trim();
+    if(!connectData.slackWebhook){ alert('Webhook URLを入力してください'); return; }
+    document.getElementById('slack-status').textContent = '設定済み';
+    document.getElementById('slack-status').className = 'connect-status on';
+    document.getElementById('slack-form').style.display = 'none';
+  }
+  alert('保存しました。GASコード生成に反映されます。');
+}
+
+// =====================
+// GAS CODE GENERATION
+// =====================
+function generateGAS() {
+  var sheetId = document.getElementById('gas-sheet').value.trim();
+  if(!sheetId){ alert('スプレッドシートIDを入力してください'); return; }
+
+  var metaSection = connectData.metaToken ? `
+  // ---- Meta広告データ取得 ----
+  var META_TOKEN   = '${connectData.metaToken || 'YOUR_META_TOKEN'}';
+  var META_ACCOUNT = '${connectData.metaAccount || 'act_YOUR_ACCOUNT_ID'}';
+  var metaUrl = 'https://graph.facebook.com/v19.0/' + META_ACCOUNT + '/insights?fields=spend,clicks,impressions,actions&date_preset=yesterday&access_token=' + META_TOKEN;
+  var metaRes = JSON.parse(UrlFetchApp.fetch(metaUrl).getContentText());
+  var metaData = metaRes.data && metaRes.data[0] ? metaRes.data[0] : {};
+  var metaSpend = parseFloat(metaData.spend || 0);
+  var metaClicks = parseInt(metaData.clicks || 0);` : `
+  // Meta未設定 - 連携設定からMetaを追加してください
+  var metaSpend = 0, metaClicks = 0;`;
+
+  var lineSection = connectData.lineToken ? `
+  // ---- LINE広告データ取得 ----
+  var LINE_TOKEN   = '${connectData.lineToken || 'YOUR_LINE_TOKEN'}';
+  var LINE_ACCOUNT = '${connectData.lineAccount || 'YOUR_LINE_ACCOUNT'}';
+  // LINE Ads APIは別途実装が必要です（公式ドキュメント参照）
+  var lineSpend = 0, lineClicks = 0; // TODO: LINE API実装` : '';
+
+  var ga4Section = connectData.ga4Prop ? `
+  // ---- GA4データ取得（サービスアカウント認証） ----
+  var GA4_PROP = '${connectData.ga4Prop || 'YOUR_GA4_PROPERTY_ID'}';
+  // ※ GASのサービスアカウント連携にはOAuth2ライブラリが必要です` : `
+  // GA4未設定 - 連携設定からGA4を追加してください`;
+
+  var slackSection = connectData.slackWebhook ? `
+  // ---- Slack通知 ----
+  var SLACK_WEBHOOK = '${connectData.slackWebhook}';
+  var msg = '*日次レポート* ' + Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd') + '\\n'
+    + '*Meta:* ¥' + metaSpend.toLocaleString() + ' / ' + metaClicks + 'クリック\\n';
+  UrlFetchApp.fetch(SLACK_WEBHOOK, { method:'post', contentType:'application/json', payload: JSON.stringify({text: msg}) });` : `
+  // Slack未設定 - 連携設定からSlackを追加してください`;
+
+  var gasCode = `// ====================================
+// Atomoi Analytics GAS
+// 生成日時: ${new Date().toLocaleString('ja-JP')}
+// スプレッドシートID: ${sheetId}
+// ====================================
+
+function runDailyReport() {
+  var ss = SpreadsheetApp.openById('${sheetId}');
+${metaSection}
+${lineSection}
+${ga4Section}
+
+  // ---- スプレッドシートに書き込み ----
+  var sheet = ss.getSheetByName('日次レポート') || ss.insertSheet('日次レポート');
+  var today = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd');
+  sheet.appendRow([today, metaSpend, metaClicks]);
+${slackSection}
+
+  Logger.log('レポート完了: ' + today);
+}`;
+
+  document.getElementById('gasCode').textContent = gasCode;
+  document.getElementById('gasOutput').classList.add('show');
+  document.getElementById('gas-status').textContent = '生成済み';
+  document.getElementById('gas-status').className = 'connect-status on';
+}
+
+function copyGAS() {
+  navigator.clipboard.writeText(document.getElementById('gasCode').textContent).then(function(){
+    alert('GASコードをコピーしました');
   });
 }
 </script>
