@@ -1285,6 +1285,13 @@ function saveConnect(type) {
     document.getElementById('ga4-setup-status').textContent = '設定済み';
     document.getElementById('ga4-setup-status').className = 'connect-status on';
     document.getElementById('ga4-setup-form').style.display = 'none';
+  } else if(type === 'google-ads') {
+    connectData.googleAdsDevToken  = document.getElementById('google-ads-dev-token').value.trim();
+    connectData.googleAdsCustomerId = document.getElementById('google-ads-customer-id').value.trim().replace(/-/g,'');
+    if(!connectData.googleAdsDevToken || !connectData.googleAdsCustomerId){ alert('デベロッパートークンと顧客IDを入力してください'); return; }
+    document.getElementById('google-ads-status').textContent = '設定済み';
+    document.getElementById('google-ads-status').className = 'connect-status on';
+    document.getElementById('google-ads-form').style.display = 'none';
   } else if(type === 'slack') {
     connectData.slackWebhook = document.getElementById('slack-webhook').value.trim();
     if(!connectData.slackWebhook){ alert('Webhook URLを入力してください'); return; }
@@ -1314,7 +1321,27 @@ function generateGAS() {
   // Meta未設定 - 連携設定からMetaを追加してください
   var metaSpend = 0, metaClicks = 0;`;
 
-  var lineSection = connectData.lineToken ? `
+  var googleAdsSection = connectData.googleAdsDevToken ? `
+  // ---- Google広告データ取得 ----
+  var GADS_DEV_TOKEN  = '${connectData.googleAdsDevToken}';
+  var GADS_CUSTOMER_ID = '${connectData.googleAdsCustomerId}';
+  var gadsUrl = 'https://googleads.googleapis.com/v16/customers/' + GADS_CUSTOMER_ID + '/googleAds:search';
+  var gadsQuery = 'SELECT campaign.name, metrics.cost_micros, metrics.clicks FROM campaign WHERE segments.date DURING YESTERDAY';
+  var gadsRes = JSON.parse(UrlFetchApp.fetch(gadsUrl, {
+    method: 'post',
+    headers: { 'Authorization': 'Bearer ' + ScriptApp.getOAuthToken(), 'developer-token': GADS_DEV_TOKEN },
+    contentType: 'application/json',
+    payload: JSON.stringify({ query: gadsQuery })
+  }).getContentText());
+  var gadsSpend = 0, gadsClicks = 0;
+  if(gadsRes.results) gadsRes.results.forEach(function(r) {
+    gadsSpend  += (r.metrics.costMicros || 0) / 1000000;
+    gadsClicks += parseInt(r.metrics.clicks || 0);
+  });` : \`
+  // Google広告未設定 - 連携設定からGoogle広告を追加してください
+  var gadsSpend = 0, gadsClicks = 0;\`;
+
+  var lineSection = connectData.lineToken ? \`
   // ---- LINE広告データ取得 ----
   var LINE_TOKEN   = '${connectData.lineToken || 'YOUR_LINE_TOKEN'}';
   var LINE_ACCOUNT = '${connectData.lineAccount || 'YOUR_LINE_ACCOUNT'}';
