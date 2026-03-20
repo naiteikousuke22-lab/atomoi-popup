@@ -662,6 +662,56 @@ input[type=range] { width:100%; accent-color:var(--red); cursor:pointer; }
       </div>
     </div>
 
+    <div class="connect-section">
+      <div class="connect-section-title">UTM / キャンペーン管理</div>
+      <div class="connect-btn" onclick="toggleConnectForm('utm-form')">
+        <span class="connect-btn-icon">🔗</span>
+        <div class="connect-btn-text">
+          <span class="connect-btn-name">UTMパラメーター生成</span>
+          <span class="connect-btn-hint">キャンペーン・記事ごとの追跡URLを一括生成</span>
+        </div>
+        <span class="connect-status off" id="utm-status">未生成</span>
+      </div>
+      <div id="utm-form" style="display:none;" class="card">
+        <div class="field">
+          <label>記事URL（ベース）</label>
+          <input type="url" id="utm-base" placeholder="https://example.com/article-a">
+        </div>
+        <div class="field">
+          <label>媒体（utm_source）</label>
+          <select id="utm-source">
+            <option value="meta">meta</option>
+            <option value="line">line</option>
+            <option value="google">google</option>
+            <option value="tiktok">tiktok</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>キャンペーン名（utm_campaign）</label>
+          <input type="text" id="utm-campaign" placeholder="例：kaya_spring_2026-04">
+          <div class="field-hint">命名ルール：クライアント_テーマ_年月（小文字・ハイフン区切り）</div>
+        </div>
+        <div class="field">
+          <label>記事パターン（utm_content）</label>
+          <input type="text" id="utm-content" placeholder="例：article-a">
+          <div class="field-hint">A/Bテストの記事を区別するラベル（article-a / article-b など）</div>
+        </div>
+        <button class="gen-btn" style="margin-top:8px;" onclick="generateUTM()">UTM付きURLを生成</button>
+        <div id="utm-output" style="display:none;margin-top:14px;">
+          <div class="output-top">
+            <div class="output-ok">✅ URL生成完了</div>
+            <button class="copy-btn" onclick="copyUTM()">コピー</button>
+          </div>
+          <div class="code-block" id="utm-url" style="max-height:80px;"></div>
+          <div style="margin-top:12px;font-size:12px;color:var(--muted);line-height:1.8;">
+            <strong style="color:#ccc;">GA4で確認できる場所：</strong><br>
+            レポート → 集客 → トラフィック獲得 → utm_campaignでフィルタ<br>
+            <strong style="color:#ccc;">スプレッドシート集計：</strong> GASコード生成時に自動でキャンペーン別シートが作られます
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div><!-- /connect-ov -->
 
@@ -753,6 +803,94 @@ input[type=range] { width:100%; accent-color:var(--red); cursor:pointer; }
     <div class="manual-section">
       <div class="manual-section-title">
         <span class="manual-num">4</span>
+        キャンペーン別・記事別の計測設定（GTM + GA4）
+      </div>
+      <div class="manual-note" style="margin-bottom:16px;"><strong>全体の流れ：</strong> 広告URL（UTM付き）→ GTMが取得 → GA4イベントに付与 → スプレッドシートに集計</div>
+
+      <div style="font-size:13px;font-weight:700;color:#ccc;margin-bottom:10px;">STEP 1｜UTMパラメーターを設計する</div>
+      <div class="manual-step">
+        <div class="manual-step-num">1</div>
+        <div class="manual-step-body"><strong>命名ルールを統一する</strong><br>
+          <code>utm_source</code>：媒体名（meta / line / google）<br>
+          <code>utm_campaign</code>：キャンペーン名（例：kaya_spring_2026-04）<br>
+          <code>utm_content</code>：記事パターン（例：article-a / article-b）
+        </div>
+      </div>
+      <div class="manual-step">
+        <div class="manual-step-num">2</div>
+        <div class="manual-step-body"><strong>連携設定 → UTM生成ツールでURLを作成</strong><br>
+          記事URL・媒体・キャンペーン名・記事パターンを入力してURLを生成。そのURLを広告の遷移先に設定する。</div>
+      </div>
+
+      <div style="font-size:13px;font-weight:700;color:#ccc;margin:16px 0 10px;">STEP 2｜GTMでGA4タグを設定する</div>
+      <div class="manual-step">
+        <div class="manual-step-num">1</div>
+        <div class="manual-step-body"><strong>GTMで変数を作成する</strong><br>
+          GTM管理画面 → 変数 → 新規 → URLパラメーター変数を4つ作成<br>
+          変数名：<code>UTM Source</code> / <code>UTM Campaign</code> / <code>UTM Content</code> / <code>Page Path</code>
+        </div>
+      </div>
+      <div class="manual-step">
+        <div class="manual-step-num">2</div>
+        <div class="manual-step-body"><strong>GA4イベントタグを作成する</strong><br>
+          GTM → タグ → 新規 → Googleアナリティクス：GA4イベント<br>
+          イベント名：<code>lp_view</code><br>
+          パラメーター追加：
+          <code>campaign</code> = {{UTM Campaign}} / <code>article</code> = {{UTM Content}} / <code>source</code> = {{UTM Source}} / <code>page</code> = {{Page Path}}
+        </div>
+      </div>
+      <div class="manual-step">
+        <div class="manual-step-num">3</div>
+        <div class="manual-step-body"><strong>トリガーを設定してパブリッシュ</strong><br>
+          トリガー：ページビュー（全ページ）<br>
+          GTM右上「公開」→ バージョン名を入力して保存
+        </div>
+      </div>
+
+      <div style="font-size:13px;font-weight:700;color:#ccc;margin:16px 0 10px;">STEP 3｜GA4でカスタムディメンションを登録する</div>
+      <div class="manual-step">
+        <div class="manual-step-num">1</div>
+        <div class="manual-step-body"><strong>GA4管理画面を開く</strong><br>
+          GA4 → 管理（左下の歯車）→ プロパティ → カスタム定義 → カスタムディメンション → 「作成」
+        </div>
+      </div>
+      <div class="manual-step">
+        <div class="manual-step-num">2</div>
+        <div class="manual-step-body"><strong>3つのディメンションを登録する</strong><br>
+          ① ディメンション名：<code>campaign</code> / スコープ：イベント / イベントパラメーター：campaign<br>
+          ② ディメンション名：<code>article</code> / スコープ：イベント / イベントパラメーター：article<br>
+          ③ ディメンション名：<code>source</code> / スコープ：イベント / イベントパラメーター：source
+        </div>
+      </div>
+      <div class="manual-step">
+        <div class="manual-step-num">3</div>
+        <div class="manual-step-body"><strong>24〜48時間待つ</strong><br>
+          登録後すぐには反映されません。翌日以降にGA4 → 探索レポートで確認できます。</div>
+      </div>
+
+      <div style="font-size:13px;font-weight:700;color:#ccc;margin:16px 0 10px;">STEP 4｜スプレッドシートで確認する</div>
+      <div class="manual-step">
+        <div class="manual-step-num">1</div>
+        <div class="manual-step-body"><strong>GASコードを生成して貼り付ける</strong><br>
+          連携設定 → GASコード生成 → コピー → script.google.com に貼り付け → 保存</div>
+      </div>
+      <div class="manual-step">
+        <div class="manual-step-num">2</div>
+        <div class="manual-step-body"><strong>スプレッドシートの構成</strong><br>
+          自動で以下のシートが作られます：<br>
+          「日次サマリー」：キャンペーン × 記事 × 日付 × PV / CV / CVR（最新が上）<br>
+          「キャンペーン別」：キャンペーンごとの累計<br>
+          「記事比較」：A記事 vs B記事 vs C記事の横並び比較
+        </div>
+      </div>
+      <div class="manual-note"><strong>注意：</strong> GTMのタグ設定後、広告URLにUTMパラメーターがついていないとGA4にデータが入りません。必ず連携設定のUTM生成ツールでURLを作ってから広告に設定してください。</div>
+    </div>
+
+    <div class="manual-divider"></div>
+
+    <div class="manual-section">
+      <div class="manual-section-title">
+        <span class="manual-num">5</span>
         Atomoi Popupの運用フロー
       </div>
       <div class="manual-step">
@@ -1203,19 +1341,76 @@ function generateGAS() {
 // スプレッドシートID: ${sheetId}
 // ====================================
 
+var SS_ID = '${sheetId}';
+var GA4_PROP = '${connectData.ga4Prop || 'YOUR_GA4_PROPERTY_ID'}';
+
+// ----------------------------
+// メイン実行（毎日自動実行）
+// ----------------------------
 function runDailyReport() {
-  var ss = SpreadsheetApp.openById('${sheetId}');
+  var ss = SpreadsheetApp.openById(SS_ID);
+  var today = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd');
 ${metaSection}
 ${lineSection}
 ${ga4Section}
 
-  // ---- スプレッドシートに書き込み ----
-  var sheet = ss.getSheetByName('日次レポート') || ss.insertSheet('日次レポート');
-  var today = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd');
-  sheet.appendRow([today, metaSpend, metaClicks]);
+  // ---- 日次サマリーシート（最新が上）----
+  var summary = ss.getSheetByName('日次サマリー') || ss.insertSheet('日次サマリー');
+  if(summary.getLastRow() === 0) {
+    summary.appendRow(['日付','媒体','キャンペーン','記事','LP URL','消化金額','クリック','CTR','LPアクセス','CV','CVR','CPA']);
+    summary.setFrozenRows(1);
+  }
+  // GA4からキャンペーン別データを取得して書き込み
+  var ga4Rows = fetchGA4CampaignData();
+  ga4Rows.forEach(function(r) {
+    summary.insertRowAfter(1);
+    summary.getRange(2, 1, 1, r.length).setValues([r]);
+  });
+
+  // ---- キャンペーン別シート（自動生成）----
+  updateCampaignSheets(ss, ga4Rows);
+
 ${slackSection}
 
   Logger.log('レポート完了: ' + today);
+}
+
+// ----------------------------
+// GA4からキャンペーン×記事別データ取得
+// ----------------------------
+function fetchGA4CampaignData() {
+  var today = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd');
+  // ※ サービスアカウント認証が必要です（OAuth2ライブラリを使用）
+  // 返却形式: [[日付, 媒体, キャンペーン, 記事, URL, 消化, クリック, CTR, LPアクセス, CV, CVR, CPA], ...]
+  // 実装時はGA4 Data APIのrunReportを使用してcampaign・article・page_pathディメンションで集計
+  return [
+    // サンプルデータ（実装後は削除）
+    [today, 'meta', 'campaign_name', 'article-a', '/lp-a', 0, 0, 0, 0, 0, 0, 0]
+  ];
+}
+
+// ----------------------------
+// キャンペーン別シートを自動生成・更新
+// ----------------------------
+function updateCampaignSheets(ss, rows) {
+  var campaigns = {};
+  rows.forEach(function(r) {
+    var camp = r[2];
+    if(!campaigns[camp]) campaigns[camp] = [];
+    campaigns[camp].push(r);
+  });
+  Object.keys(campaigns).forEach(function(camp) {
+    var sheetName = camp.substring(0, 30);
+    var sheet = ss.getSheetByName(sheetName) || ss.insertSheet(sheetName);
+    if(sheet.getLastRow() === 0) {
+      sheet.appendRow(['日付','媒体','記事','LP URL','LPアクセス','CV','CVR']);
+      sheet.setFrozenRows(1);
+    }
+    campaigns[camp].forEach(function(r) {
+      sheet.insertRowAfter(1);
+      sheet.getRange(2, 1, 1, 7).setValues([[r[0],r[1],r[3],r[4],r[8],r[9],r[10]]]);
+    });
+  });
 }`;
 
   document.getElementById('gasCode').textContent = gasCode;
@@ -1227,6 +1422,37 @@ ${slackSection}
 function copyGAS() {
   navigator.clipboard.writeText(document.getElementById('gasCode').textContent).then(function(){
     alert('GASコードをコピーしました');
+  });
+}
+
+// =====================
+// UTM GENERATOR
+// =====================
+function generateUTM() {
+  var base     = document.getElementById('utm-base').value.trim();
+  var source   = document.getElementById('utm-source').value;
+  var campaign = document.getElementById('utm-campaign').value.trim();
+  var content  = document.getElementById('utm-content').value.trim();
+  if(!base){ alert('記事URLを入力してください'); return; }
+  if(!campaign){ alert('キャンペーン名を入力してください'); return; }
+
+  var sep = base.includes('?') ? '&' : '?';
+  var url = base + sep
+    + 'utm_source=' + encodeURIComponent(source)
+    + '&utm_medium=paid'
+    + '&utm_campaign=' + encodeURIComponent(campaign)
+    + (content ? '&utm_content=' + encodeURIComponent(content) : '');
+
+  document.getElementById('utm-url').textContent = url;
+  document.getElementById('utm-output').style.display = 'block';
+  document.getElementById('utm-status').textContent = '生成済み';
+  document.getElementById('utm-status').className = 'connect-status on';
+}
+
+function copyUTM() {
+  var url = document.getElementById('utm-url').textContent;
+  navigator.clipboard.writeText(url).then(function(){
+    alert('URLをコピーしました');
   });
 }
 </script>
